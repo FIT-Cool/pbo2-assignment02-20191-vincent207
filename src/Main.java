@@ -4,7 +4,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ *
+ * @author : Vincent Gunaeri (1772001)
+ * Program : Tampilan penggunaan TableView, BorderPane, VBox, HBox, GridPane, dan komponen lainnya
+ *
+ */
 public class Main extends Application {
+
 
     @Override
     public void start(Stage primaryStage) throws Exception{
