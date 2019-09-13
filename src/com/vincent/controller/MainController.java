@@ -15,10 +15,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- *
  * @author : Vincent Gunaeri (1772001)
  * Program: Controller untuk tampilan MainForm.fxml
- *
  */
 public class MainController implements Initializable {
 
@@ -51,6 +49,7 @@ public class MainController implements Initializable {
 
     /**
      * resetAct berfungsi untuk melakukan reset pada textField yang ada pada program
+     *
      * @param actionEvent
      */
     @FXML
@@ -63,63 +62,86 @@ public class MainController implements Initializable {
 
     /**
      * saveAct berfungsi untuk mencatat input user ke TableView tblData
+     *
      * @param actionEvent
      */
     @FXML
     private void saveAct(ActionEvent actionEvent) {
-        if ((!txtName.getText().isEmpty() && !txtPrice.getText().isEmpty()) && !categories.isEmpty()) {
-            Item i = new Item();
-            i.setName(txtName.getText());
-            i.setPrice(Double.parseDouble(txtPrice.getText()));
-            Category c = new Category();
-            c.setCategoryName(catComboBox.getSelectionModel().getSelectedItem().toString());
-            i.setCategory(c);
-            items.add(i);
-        } else {
+        int iterator = 0;
+        for(Item i : items)
+        {
+            if(i.getName().equals(txtName.getText()))
+            {
+                iterator++;
+            }
+        }
+        if(iterator >= 1)
+        {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
-            alert.setContentText("Please fill name/price/category");
+            alert.setContentText("Duplicate name");
             alert.show();
+        }
+        else{
 
+            if (txtName.getText().isEmpty() || txtPrice.getText().isEmpty() || catComboBox.getSelectionModel().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setContentText("Please fill name/price/category");
+                alert.show();
+            } else {
+                Item i = new Item();
+                i.setName(txtName.getText());
+                i.setPrice(Double.parseDouble(txtPrice.getText()));
+                Category c = new Category();
+                c.setCategoryName(catComboBox.getSelectionModel().getSelectedItem().toString());
+                i.setCategory(c);
+                items.add(i);
+
+            }
+            txtName.clear();
+            txtPrice.clear();
+            catComboBox.getSelectionModel().clearSelection();
         }
     }
 
     /**
      * method updateAct berfungsi untuk melakukan update dari TableView dengan input dari user yang baru
+     *
      * @param actionEvent
      */
     @FXML
     private void updateAct(ActionEvent actionEvent) {
-        if ((!txtName.getText().isEmpty() && !txtPrice.getText().isEmpty()) && !categories.isEmpty()) {
+        if (txtName.getText().isEmpty() || txtPrice.getText().isEmpty() || catComboBox.getSelectionModel().isEmpty()) {
 
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setContentText("Please fill name/price/category");
+            alert.show();
+
+        } else {
+            int index = tblData.getSelectionModel().getSelectedIndex();
             items.remove(tblData.getSelectionModel().getSelectedItem());
             Item i = new Item();
             i.setName(txtName.getText());
             i.setPrice(Double.parseDouble(txtPrice.getText()));
             Category c = catComboBox.getSelectionModel().getSelectedItem();
             i.setCategory(c);
-            if(items.isEmpty())
-            {
+            if (items.isEmpty()) {
                 items.add(i);
+            } else {
+                items.add(index, i);
+                tblData.getSelectionModel().select(i);
             }
-            else
-            {
-                items.add(tblData.getSelectionModel().getSelectedIndex(), i);
-            }
-
-
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setContentText("Please fill name/price/category");
-            alert.show();
 
         }
         updateBtn.setDisable(true);
+        saveButton.setDisable(false);
     }
 
     /**
      * method initialize berfungsi untuk melakukan link observableArrayList ke TableView dan/atau comboBox pada program
+     *
      * @param location
      * @param resources
      */
@@ -127,15 +149,15 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         items = FXCollections.observableArrayList();
         tblData.setItems(items);
-        colName.setCellValueFactory(data ->{
+        colName.setCellValueFactory(data -> {
             Item i = data.getValue();
             return new SimpleStringProperty(i.getName());
         });
-        colPrice.setCellValueFactory(data ->{
-           Item i = data.getValue();
-           return new SimpleStringProperty(String.valueOf(i.getPrice()));
+        colPrice.setCellValueFactory(data -> {
+            Item i = data.getValue();
+            return new SimpleStringProperty(String.valueOf(i.getPrice()));
         });
-        colCategory.setCellValueFactory(data ->{
+        colCategory.setCellValueFactory(data -> {
             Item i = data.getValue();
             return new SimpleStringProperty(i.getCategory().getCategoryName());
         });
@@ -146,28 +168,29 @@ public class MainController implements Initializable {
 
     /**
      * tableClicked method berfungsi untuk membuka buttonUpdate yang akan berfungsi untuk proses update
+     *
      * @param mouseEvent
      */
     @FXML
     private void tblClicked(MouseEvent mouseEvent) {
+        saveButton.setDisable(true);
         if (items.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Can't read data");
             alert.setContentText("Please insert data first before editing");
             alert.show();
-        }
-        else
-        {
+        } else {
             updateBtn.setDisable(false);
             Item i = tblData.getSelectionModel().getSelectedItem();
             txtName.setText(i.getName());
             txtPrice.setText(String.valueOf(i.getPrice()));
-            txtCatName.setText(i.getCategory().getCategoryName());
+            catComboBox.getSelectionModel().select(i.getCategory());
         }
     }
 
     /**
      * saveCatAct method berfungsi untuk mencatat input Category ke comboBox
+     *
      * @param actionEvent
      */
     @FXML
@@ -177,22 +200,17 @@ public class MainController implements Initializable {
             Category c = new Category();
             c.setCategoryName(txtCatName.getText());
             int iterator = 0;
-            for(Category category : categories)
-            {
-                if(category.getCategoryName().equals(c.getCategoryName()))
-                {
+            for (Category category : categories) {
+                if (category.getCategoryName().equals(c.getCategoryName())) {
                     iterator++;
                 }
             }
-            if(iterator >= 1)
-            {
+            if (iterator >= 1) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setContentText("Duplicate category name");
                 alert.show();
-            }
-            else
-            {
+            } else {
                 categories.add(c);
             }
 
@@ -203,5 +221,7 @@ public class MainController implements Initializable {
             alert.setContentText("Please fill category name");
             alert.show();
         }
+
+        txtCatName.clear();
     }
 }
